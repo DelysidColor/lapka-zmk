@@ -9,11 +9,11 @@
 #define ___ &none
 #define ______ &trans
 
-#define DEF 0
-#define GAM 1
-#define GFN 2
-#define NAV 3
-#define SYM 4
+#define BASE 0
+#define RU 1
+#define NAV 2
+#define SYM 3
+#define ADJ 4
 #define NUM 5
 #define CMD 6
 
@@ -70,117 +70,100 @@
         keep-mods = <(KEEP_MODS)>; \
     };
 
-&sk {
-        release-after-ms = <60000>;
+&mt {
+    quick-tap-ms = <180>;
+    flavor = "tap-preferred";
+    require-prior-idle-ms = <125>;
 };
 
 / {
     behaviors {
-        MACRO_ONE_PARAM(
-            m_release_key_twice,
-            &macro_release
-                &macro_param_1to1 &kp PARAM_1
-                &macro_param_1to1 &kp PARAM_1
-        )
+        hml: home_row_mod_left {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            require-prior-idle-ms = <125>;
+            tapping-term-ms = <180>;
+            quick-tap-ms = <150>;
+            bindings = <&kp>, <&kp>;
 
+            hold-trigger-key-positions = < 0 1 2 3 4 10 11 12 13 14 20 21 22 23 24 30 31 32 >;
+            hold-trigger-on-release;
+        };
 
-        MACRO_ONE_PARAM(
-            m_press_key_twice,
-            &macro_press
-                &macro_param_1to1 &kp PARAM_1
-                &macro_param_1to1 &kp PARAM_1
-            &macro_pause_for_release
-            &macro_tap
-                &m_release_key_twice PARAM_1
-        )
+        hmr: home_row_mod_right {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            require-prior-idle-ms = <125>;
+            tapping-term-ms = <180>;
+            quick-tap-ms = <150>;
+            bindings = <&kp>, <&kp>;
 
-        STICKY_FOREVER(sticky_forever, &m_press_key_twice)
-
-        MODMORPH(
-            cm_gui,
-            &sticky_forever LGUI,
-            &m_release_key_twice LGUI,
-            MOD_LGUI,
-            MOD_LGUI
-        )
-
-        MODMORPH(
-            cm_alt,
-            &sticky_forever LALT,
-            &m_release_key_twice LALT,
-            MOD_LALT,
-            MOD_LALT
-        )
-
-        MODMORPH(
-            cm_ctrl,
-            &sticky_forever LCTRL,
-            &m_release_key_twice LCTRL,
-            MOD_LCTL,
-            MOD_LCTL
-        )
-
-        MODMORPH(
-            cm_sft,
-            &sticky_forever LSHIFT,
-            &m_release_key_twice LSHIFT,
-            MOD_LSFT,
-            MOD_LSFT
-        )
-
-        MACRO_TWO_PARAM(
-            m_hold_mod_press_key,
-            &macro_press
-                &macro_param_1to1 &kp PARAM_1
-            &macro_tap
-                &macro_param_2to1 &kp PARAM_2
-        )
-
-        MODMORPH(
-            tabber,
-            &m_hold_mod_press_key LCTRL TAB,
-            &kp TAB,
-            MOD_LCTL,
-            MOD_LCTL
-        )
-
-        MODMORPH(
-            swapper_win,
-            &m_hold_mod_press_key LALT TAB,
-            &kp TAB,
-            MOD_LALT,
-            MOD_LALT
-        )
-
-        MODMORPH(
-            swapper_mac,
-            &m_hold_mod_press_key LGUI TAB,
-            &kp TAB,
-            MOD_LGUI,
-            MOD_LGUI
-        )
-
-        MACRO_ONE_PARAM(
-            la,
-            &macro_tap
-                &kp 0 // do nothing, fire all sticky keys
-            &macro_press
-                &macro_param_1to1 &mo PARAM_1
-            &macro_pause_for_release
-            &macro_release
-                &macro_param_1to1 &mo PARAM_1
-                &kp LSHFT
-                &kp LCTRL
-                &kp LALT
-                &kp LGUI
-        )
+            hold-trigger-key-positions = < 5 6 7 8 9 15 16 17 18 19 25 26 27 28 29 33 34 35 >;
+            hold-trigger-on-release;
+        };
     };
 
-    conditional_layers {
-        compatible = "zmk,conditional-layers";
-        tri_layer {
-            if-layers  = <NAV SYM>;
-            then-layer = <NUM>;
+    combos {
+        compatible = "zmk,combos";
+
+        copy {
+            bindings = <&kp LG(C)>;
+            key-positions = <22 21>;
+        };
+
+        hrdsgn {
+            bindings = <&kp LG(V)>;
+            key-positions = <22 23>;
+        };
+
+        cmd_z {
+            bindings = <&kp LG(Z)>;
+            key-positions = <22 24>;
+        };
+
+        cut {
+            bindings = <&kp LG(X)>;
+            key-positions = <22 20>;
+        };
+
+        x {
+            bindings = <&kp LEFT_BRACKET>;
+            key-positions = <34 29>;
+        };
+
+        ru_comma {
+            bindings = <&kp LS(NUMBER_6)>;
+            key-positions = <26 27>;
+        };
+
+        ru_dot {
+            bindings = <&kp LS(N7)>;
+            key-positions = <27 28>;
+        };
+
+        ru_hard_mark {
+            bindings = <&kp RIGHT_BRACKET>;
+            key-positions = <25 26>;
+        };
+    };
+
+    macros {
+        ru_layout: ru_layout {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LC(SPACE)>, <&macro_wait_time 20>, <&to 1>;
+
+            label = "RU_LAYOUT";
+        };
+
+        en_layout: en_layout {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LC(SPACE)>, <&macro_wait_time 20>, <&to 0>;
+
+            label = "EN_LAYOUT";
         };
     };
 };
@@ -189,48 +172,48 @@
     keymap {
         compatible = "zmk,keymap";
 
-        def_layer {
+        base_layer {
             bindings = <
-_ Q          _ W          _ E          _ R         _ T             _ Y          _ U          _ I          _ O          _ P
-_ A          _ S          _ D          _ F         _ G             _ H          _ J          _ K          _ L          _ SEMI
-_ Z          _ X          _ C          _ V         _ B             _ N          _ M          _ COMMA      _ DOT        _ FSLH
-                          _ CAPS       _ SPACE     &la NAV         &la SYM      _ LSFT       _ RALT
+  &kp Q        &lt 4 W       &lt 3 F      &lt 2 P       &kp B                                 &kp J      &lt 2 L       &lt 3 U      &kp Y         &mt LG(SLASH) EQUAL
+  &hml LALT A  &hml LCTRL R  &hml LCMD S  &hml LSHFT T  &kp G                                 &kp M      &hmr LSHFT N  &hmr LGUI E  &hmr LCTRL I  &kp O
+  &kp X        &kp C         &kp D        &kp V         &kp Z                                 &kp K      &kp H         &kp COMMA    &kp DOT       &kp APOS
+                                          &kp ENTER     &mt SPACE TAB  &kp ESC    &ru_layout  &kp SPACE  &kp BSPC
             >;
         };
 
-        gam_layer {
+        ru_layer {
             bindings = <
-_ TAB        _ Q          _ W          _ E         _ R             ___          ___          _ UP         ___          _ TAB
-_ LSFT       _ A          _ S          _ D         _ F             ___          _ LEFT       _ DOWN       _ RIGHT      _ RSFT
-_ LCTRL      _ Z          _ X          _ C         _ V             ___          ___          ___          ___          _ RCTRL
-                          _ LALT       _ SPACE     &mo GFN         &tog GAM     _ SPACE      ______
-            >;
-        };
-
-        gfn_layer {
-            bindings = <
-_ N5         _ N1         _ N2         _ N3        _ N4            &out OUT_TOG &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_CLR_ALL
-_ N0         _ N6         _ N7         _ N8        _ N9            ___          ___          ___          ___          ___
-_ G          _ J          _ I          _ M         _ T             _ KP_NUM     ___          ___          &sys_reset   &bootloader
-                          _ ESC        _ RET       ______          ______       ______       ___
+  &kp Q        &lt 4 W       &lt 3 E      &lt 2 R       &kp T                           &kp Y      &lt 2 U       &lt 3 I      &kp O         &kp P
+  &hml LALT A  &hml LCTRL S  &hml LCMD D  &hml LSHFT F  &kp G                           &kp H      &hmr LSHFT J  &hmr LGUI K  &hmr LCTRL L  &kp SEMICOLON
+  &kp Z        &kp X         &kp C        &kp V         &kp B                           &kp N      &kp M         &kp COMMA    &kp DOT       &kp SQT
+                                          &kp ENTER     &kp TAB  &kp ESC    &en_layout  &kp SPACE  &kp BSPC
             >;
         };
 
         nav_layer {
             bindings = <
-&tabber      &swapper_win &swapper_mac ___         _ ESC           _ ESC        _ HOME       _ END        _ BSPC       _ DEL
-&cm_gui      &cm_alt      &cm_ctrl     &cm_sft     _ RET           _ RET        _ LEFT       _ DOWN       _ UP         _ RIGHT
-_ PSPC       _ NSPC       &tog GAM     _ PSCRN     _ TAB           _ TAB        _ PG_UP      _ PG_DN      _ APOS       _ KP_NUM
-                          &mo CMD      ______      ______          ______       ______       ______
+  &none     &none     &kp UP_ARROW                       &none      &none                          &none      &kp N7        &kp N8        &kp N9        &none
+  &kp LALT  &kp LEFT  &mt LA(LS(DOWN_ARROW)) DOWN_ARROW  &kp RIGHT  &none                          &none      &kp NUMBER_4  &kp N5        &kp NUMBER_6  &kp N0
+  &none     &none     &none                              &none      &kp DELETE                     &none      &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3  &none
+                                                         &kp ENTER  &kp LGUI    &kp ESC    &tog 1  &kp LSHFT  &kp BSPC
             >;
         };
 
         sym_layer {
             bindings = <
-_ N1         _ N2         _ N3         _ N4        _ N5            _ N6         _ N7         _ N8         _ N9         _ N0
-_ SEMI       _ GRV        _ SQT        _ DQT       _ MINUS         _ PLUS       &cm_sft      &cm_ctrl     &cm_alt      &cm_gui
-_ BSL        ___          _ LS(LBKT)   _ LBKT      _ UNDER         _ EQUAL      _ RBKT       _ LS(RBKT)   _ PIP        _ BSLH
-                          ______       ______      ______          ______       ______       _ RALT
+  &none  &kp HASH      &kp COLON      &kp AT_SIGN  &kp AMPERSAND                    &kp BACKSLASH  &kp LEFT_PARENTHESIS  &kp UNDER  &kp RIGHT_PARENTHESIS  &none
+  &none  &kp ASTERISK  &kp SEMICOLON  &kp PERCENT  &kp SQT                          &kp PIPE       &kp LEFT_BRACKET      &kp MINUS  &kp RIGHT_BRACKET      &kp EXCLAMATION
+  &none  &kp CARET     &kp GRAVE      &kp DOLLAR   &none                            &kp SLASH      &kp LEFT_BRACE        &kp TILDE  &kp RIGHT_BRACE        &kp QUESTION
+                                      &kp ENTER    &kp TAB        &trans    &trans  &kp SPACE      &kp BSPC
+            >;
+        };
+
+        adj_layer {
+            bindings = <
+  &none  &none  &kp LC(LEFT)  &kp LC(RIGHT)         &ru_layout                           &bt BT_SEL 0  &bt BT_SEL 1         &bt BT_SEL 2       &bt BT_SEL 3        &bt BT_CLR
+  &none  &none  &none         &kp LS(LG(NUMBER_4))  &en_layout                           &out OUT_BLE  &hmr RCTRL C_VOL_DN  &hmr RSHFT C_MUTE  &hmr LALT C_VOL_UP  &kp RGUI
+  &none  &none  &none         &kp LS(LG(N5))        &none                                &out OUT_USB  &kp C_PREV           &kp C_PP           &kp C_NEXT          &studio_unlock
+                              &kp LA(LG(LEFT))      &kp LA(LG(RIGHT))  &trans    &trans  &trans        &trans
             >;
         };
 
